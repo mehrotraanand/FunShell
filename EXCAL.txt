@@ -1,0 +1,86 @@
+DT=$1
+len=`echo $DT | wc -c`
+case $len in
+     5) YYYY=$DT  # ex ARG=2004
+        cal $YYYY;; # simple year calender
+     6) YYYY=$DT # ex ARG=55555
+        if [ $YYYY -ge 0 ]; then
+             oldYYYY="${YYYY}"
+        else
+             oldYYYY=`echo $YYYY | cut -c2-5`" BC"
+        fi
+        while [ $YYYY -le 0 ]
+        do
+                ((YYYY = YYYY + 28))
+        done
+        while [ $YYYY -gt 9999 ]
+        do
+                ((YYYY = YYYY - 28))
+        done
+
+#        YYYY=`echo ${YYYY} | awk '{printf "%4.4d", $1 }'`
+        cal $YYYY > RESULT
+        cat RESULT | head -4 | sed "s/${YYYY}/${oldYYYY}/g" > RESULT.TMP
+        cat RESULT | tail +5 >> RESULT.TMP
+        cat RESULT.TMP
+        rm -f RESULT RESULT.TMP;;
+     7) YYYY=`echo $DT | cut -c1-4` # ex ARG=200503
+        MM=`echo $DT | cut -c5-6`
+        cal $MM $YYYY;; # simple month calender
+     8) YYYY=`echo $DT | cut -c1-5` # ex ARG 5555503 or -100003
+        MM=`echo $DT | cut -c6-7`
+        if [ $YYYY -ge 0 ]; then
+             oldYYYY="${YYYY}"
+        else
+             oldYYYY=`echo $YYYY | cut -c2-5`" BC"
+        fi
+        while [ $YYYY -le 0 ]
+        do
+                ((YYYY = YYYY + 28))
+        done
+        while [ $YYYY -gt 9999 ]
+        do
+                ((YYYY = YYYY - 28))
+        done
+#        YYYY=`echo ${YYYY} | awk '{printf "%4.4d", $1 }'`
+        cal $MM $YYYY > RESULT
+        firstline=`head -1 RESULT`
+        cat RESULT | head -1 | sed "s/${YYYY}/${oldYYYY}/g" > RESULT.TMP
+        cat RESULT | grep -v "${firstline}" >> RESULT.TMP
+        cat RESULT.TMP
+        rm -f RESULT RESULT.TMP;;
+     9) common $DT;; # ARG=20050325 Getting weekday
+    10) YYYY=`echo $DT | cut -c1-5` # ex ARG=-10000325
+        MM=`echo $DT | cut -c6-7`
+        DD=`echo $DT | cut -c8-9`
+        while [ $YYYY -le 0 ]
+        do
+                ((YYYY = YYYY + 28))
+        done
+        while [ $YYYY -gt 9999 ]
+        do
+                ((YYYY = YYYY - 28))
+        done
+        YYYY=`echo ${YYYY} | awk '{printf "%4.4d", $1 }'`
+        cal $MM $YYYY > MONTH
+        common ${YYYY}${MM}${DD};; # Getting weekday
+    11) YYYY=`echo $DT | cut -c1-6` # ex ARG=-10000325
+        MM=`echo $DT | cut -c7-8`
+        DD=`echo $DT | cut -c9-10`
+        while [ $YYYY -le 0 ]
+        do
+                ((YYYY = YYYY + 28))
+        done
+        while [ $YYYY -gt 9999 ]
+        do
+                ((YYYY = YYYY - 28))
+        done
+        YYYY=`echo ${YYYY} | awk '{printf "%4.4d", $1 }'`
+        cal $MM $YYYY > MONTH
+        common ${YYYY}${MM}${DD};; # Getting weekday
+     *) echo "Usage: $0 <YYYY> or <YYYYY> or <YYYYMM> or <YYYYYMM> or <YYYYMMDD>
+ or <YYYYYMMDD> "
+        echo "Description: EXtended CALendar to show 9999 BC to 99999 AD "
+        exit 1;;
+esac
+
